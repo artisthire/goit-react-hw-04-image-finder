@@ -48,8 +48,12 @@ function App() {
       });
   }, [filter, page]);
 
-  function handleFormSubmit(filter) {
-    setFilter(filter);
+  function handleFormSubmit(newFilter) {
+    if (newFilter === filter) {
+      return;
+    }
+
+    setFilter(newFilter);
     setImages([]);
     setTotalImages(0);
     setPage(1);
