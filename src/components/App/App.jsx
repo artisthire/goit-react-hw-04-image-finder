@@ -1,7 +1,8 @@
-import { Component } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import serverAPI from 'services/api';
 import toast, { Toaster } from 'react-hot-toast';
 
+import { TOAST_OPTION } from '../../services/toastOption';
 import { Wrapper, Inner } from './App.styled';
 import Searchbar from 'components/Searchbar';
 import ImageGallery from 'components/ImageGallery';
@@ -10,81 +11,62 @@ import Loading from 'components/Loading';
 
 const IMAGES_PER_PAGE = 12;
 
-const TOAST_OPTION = {
-  containerStyle: {
-    top: 120,
-  },
-
-  toastOptions: {
-    style: {
-      maxWidth: 500,
-      padding: 20,
-      fontSize: 18,
-      fontWeight: 600,
-      textAlign: 'center',
-    },
-  },
-};
-
 const STATUS = {
   IDLE: 'idle',
   PENDING: 'pending',
   RESOLVED: 'resolved',
   REJECTED: 'rejected',
 };
-class App extends Component {
-  state = {
-    filter: '',
-    images: [],
-    totalImages: 0,
-    page: 1,
-    status: STATUS.IDLE,
-  };
 
-  componentDidUpdate(_, prevState) {
-    const { filter: prevFilter, page: prevPage } = prevState;
-    const { filter, page } = this.state;
+function App() {
+  const [filter, setFilter] = useState('');
+  const [images, setImages] = useState([]);
+  const [totalImages, setTotalImages] = useState(0);
+  const [page, setPage] = useState(1);
+  const [status, setStatus] = useState(STATUS.IDLE);
 
-    if (prevFilter !== filter || prevPage !== page) {
-      this.getImages({ filter, page });
+  const toastId = useRef(null);
+
+  useEffect(() => {
+    if (filter === '') {
+      return;
     }
-  }
 
-  handleFormSubmit = filter => {
-    this.setState({ filter, images: [], totalImages: 0, page: 1 });
-  };
-
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
-
-  getImages({ filter, page, perPage = IMAGES_PER_PAGE }) {
-    this.setState({ status: STATUS.PENDING });
+    setStatus(STATUS.PENDING);
 
     serverAPI
-      .getData(filter, page, perPage)
-      .then(data =>
-        this.setState(prevState => ({
-          images: [...prevState.images, ...data.images],
-          totalImages: data.totalImages,
-          status: STATUS.RESOLVED,
-        }))
-      )
+      .getData(filter, page, IMAGES_PER_PAGE)
+      .then(data => {
+        toast.dismiss(toastId.current);
+        setImages(images => [...images, ...data.images]);
+        setTotalImages(data.totalImages);
+        setStatus(STATUS.RESOLVED);
+      })
       .catch(error => {
-        this.setState({ status: STATUS.REJECTED });
-        toast.error(error.message);
+        setStatus(STATUS.REJECTED);
+        toastId.current = toast.error(error.message);
       });
+  }, [filter, page]);
+
+  function handleFormSubmit(filter) {
+    setFilter(filter);
+    setImages([]);
+    setTotalImages(0);
+    setPage(1);
   }
 
-  haveMoreImages() {
-    const { page, totalImages } = this.state;
+  function handleLoadMore() {
+    setPage(page => page + 1);
+  }
+
+  function haveMoreImages() {
     const isMoreImages = totalImages - page * IMAGES_PER_PAGE > 0;
 
     return isMoreImages;
   }
 
-  transformImagesData() {
-    const newImages = this.state.images.map(
+  const showImages = useMemo(() => {
+    const newImages = images.map(
       ({ id, tags, webformatURL, largeImageURL }) => ({
         id,
         alt: tags,
@@ -94,32 +76,28 @@ class App extends Component {
     );
 
     return newImages;
-  }
+  }, [images]);
 
-  render() {
-    const { status } = this.state;
-    const images = this.transformImagesData();
-    const isMoreImages = this.haveMoreImages() && status === STATUS.RESOLVED;
+  const isMoreImages = haveMoreImages() && status === STATUS.RESOLVED;
 
-    return (
-      <Wrapper>
-        <Searchbar
-          onSubmit={this.handleFormSubmit}
-          isLoading={status === STATUS.PENDING}
-        />
+  return (
+    <Wrapper>
+      <Searchbar
+        onSubmit={handleFormSubmit}
+        isLoading={status === STATUS.PENDING}
+      />
 
-        <Inner>
-          <ImageGallery images={images} />
+      <Inner>
+        <ImageGallery images={showImages} />
 
-          {isMoreImages && <Button onClick={this.handleLoadMore} />}
+        {isMoreImages && <Button onClick={handleLoadMore} />}
 
-          {status === STATUS.PENDING && <Loading />}
-        </Inner>
+        {status === STATUS.PENDING && <Loading />}
+      </Inner>
 
-        <Toaster {...TOAST_OPTION} />
-      </Wrapper>
-    );
-  }
+      <Toaster {...TOAST_OPTION} />
+    </Wrapper>
+  );
 }
 
 export default App;

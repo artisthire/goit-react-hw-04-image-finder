@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { nanoid } from 'nanoid';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
@@ -8,8 +8,10 @@ import { Container, Form, Button, Label, Input } from './Searchbar.styled';
 function Searchbar({ onSubmit, isLoading }) {
   const [filter, setFilter] = useState('');
   const inputId = nanoid(5);
+  const toastId = useRef(null);
 
   function handleChange({ target }) {
+    toast.dismiss(toastId.current);
     setFilter(target.value);
   }
 
@@ -21,7 +23,7 @@ function Searchbar({ onSubmit, isLoading }) {
       setFilter('');
 
       if (normalizedFilter === '') {
-        toast.error('Request cannot be empty');
+        toastId.current = toast.error('Request cannot be empty');
         return;
       }
 
@@ -45,6 +47,7 @@ function Searchbar({ onSubmit, isLoading }) {
           id={inputId}
           value={filter}
           onChange={handleChange}
+          onClick={() => toast.dismiss(toastId.current)}
         />
       </Form>
     </Container>

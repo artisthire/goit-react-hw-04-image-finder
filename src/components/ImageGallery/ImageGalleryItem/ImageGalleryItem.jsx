@@ -7,7 +7,7 @@ function ImageGalleryItem({ alt, smallImg, fullImg }) {
   const [showModal, setShowModal] = useState(false);
 
   function handleToggleModal() {
-    setShowModal(!showModal);
+    setShowModal(showModal => !showModal);
   }
 
   return (
