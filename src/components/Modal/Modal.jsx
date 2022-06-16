@@ -13,14 +13,6 @@ function Modal({ children, onClose }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   });
 
-  // componentDidMount() {
-  //   window.addEventListener('keydown', this.handleKeyDown);
-  // }
-
-  // componentWillUnmount() {
-  //   window.removeEventListener('keydown', this.handleKeyDown);
-  // }
-
   function handleKeyDown(evt) {
     if (evt.code === 'Escape') {
       onClose();
