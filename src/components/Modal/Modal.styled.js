@@ -28,7 +28,9 @@ export const CloseBtn = styled.button`
   width: 40px;
   height: 40px;
   padding: 0;
-  border: none;
+  border: 1px solid black;
+  border-radius: 10px;
+  color: black;
   background-color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
 

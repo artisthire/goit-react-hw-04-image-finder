@@ -15,6 +15,7 @@ const rotate = keyframes`
 export const LoadingIcon = styled(ImSpinner9)`
   width: 90px;
   height: 90px;
+  margin-top: 30px;
   color: #697adb;
 
   animation: ${rotate} 1s linear infinite;
