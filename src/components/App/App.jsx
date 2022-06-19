@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import serverAPI from 'services/api';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -69,19 +69,6 @@ function App() {
     return isMoreImages;
   }
 
-  const showImages = useMemo(() => {
-    const newImages = images.map(
-      ({ id, tags, webformatURL, largeImageURL }) => ({
-        id,
-        alt: tags,
-        smallImg: webformatURL,
-        fullImg: largeImageURL,
-      })
-    );
-
-    return newImages;
-  }, [images]);
-
   const isMoreImages = haveMoreImages() && status === STATUS.RESOLVED;
 
   return (
@@ -92,7 +79,7 @@ function App() {
       />
 
       <Inner>
-        <ImageGallery images={showImages} />
+        <ImageGallery images={images} />
 
         {isMoreImages && <Button onClick={handleLoadMore} />}
 

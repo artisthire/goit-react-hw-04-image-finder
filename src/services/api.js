@@ -14,7 +14,16 @@ async function getData(query, page = 1, perPage = 12) {
       throw new Error(`Not found for request: "${query}"`);
     }
 
-    return { totalImages: data.totalHits, images: data.hits };
+    const images = data.hits.map(
+      ({ id, tags, webformatURL, largeImageURL }) => ({
+        id,
+        alt: tags,
+        smallImg: webformatURL,
+        fullImg: largeImageURL,
+      })
+    );
+
+    return { totalImages: data.totalHits, images };
   } catch (error) {
     if (error.code) {
       throw new Error(
