@@ -1,28 +1,39 @@
+import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import { GalleryList } from './ImageGallery.styled';
 
 import ImageGalleryItem from 'components/ImageGallery/ImageGalleryItem';
 
-function ImageGallery({ images }) {
+const ImageGallery = forwardRef(({ images, refIndex }, ref) => {
   return (
-    images.length > 0 && (
-      <GalleryList>
-        {images.map(image => {
-          const { id, alt, smallImg, fullImg } = image;
+    <GalleryList>
+      {images.map((image, index) => {
+        const { id, alt, smallImg, fullImg } = image;
 
+        if (index === refIndex) {
           return (
             <ImageGalleryItem
               key={id}
               smallImg={smallImg}
               fullImg={fullImg}
               alt={alt}
+              ref={ref}
             />
           );
-        })}
-      </GalleryList>
-    )
+        }
+
+        return (
+          <ImageGalleryItem
+            key={id}
+            smallImg={smallImg}
+            fullImg={fullImg}
+            alt={alt}
+          />
+        );
+      })}
+    </GalleryList>
   );
-}
+});
 
 ImageGallery.propTypes = {
   images: PropTypes.arrayOf(

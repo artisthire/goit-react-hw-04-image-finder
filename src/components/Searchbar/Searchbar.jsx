@@ -1,11 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, forwardRef } from 'react';
 import { nanoid } from 'nanoid';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import { IoIosSearch } from 'react-icons/io';
 import { Container, Form, Button, Label, Input } from './Searchbar.styled';
 
-function Searchbar({ onSubmit, isLoading }) {
+const Searchbar = forwardRef(({ onSubmit, isLoading }, ref) => {
   const [filter, setFilter] = useState('');
   const inputId = nanoid(5);
   const toastId = useRef(null);
@@ -32,7 +32,7 @@ function Searchbar({ onSubmit, isLoading }) {
   }
 
   return (
-    <Container>
+    <Container ref={ref}>
       <Form onSubmit={handleSubmit}>
         <Button type="submit" aria-label="Search" disabled={isLoading}>
           <IoIosSearch />
@@ -52,7 +52,7 @@ function Searchbar({ onSubmit, isLoading }) {
       </Form>
     </Container>
   );
-}
+});
 
 Searchbar.propTypes = {
   onSubmit: PropTypes.func.isRequired,

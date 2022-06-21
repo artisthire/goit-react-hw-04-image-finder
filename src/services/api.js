@@ -1,29 +1,47 @@
 import axios from 'axios';
 
-const API_KEY = '27905247-52ff39917099ed7913d47ea34';
+const axiosGet = axios.create({
+  method: 'get',
+  baseURL: 'https://pixabay.com/api/',
+  params: {
+    key: '27905247-52ff39917099ed7913d47ea34',
+    image_type: 'photo',
+    orientation: 'horizontal',
+  },
+});
 
-axios.defaults.baseURL = 'https://pixabay.com/api';
+axiosGet.interceptors.response.use(({ data }) => {
+  const images = data.hits.map(({ id, tags, webformatURL, largeImageURL }) => ({
+    id,
+    alt: tags,
+    smallImg: webformatURL,
+    fullImg: largeImageURL,
+  }));
+
+  const newData = {
+    total: data.total,
+    totalImages: data.totalHits,
+    images,
+  };
+
+  return newData;
+});
 
 async function getData(query, page = 1, perPage = 12) {
   try {
-    const { data } = await axios.get(
-      `/?key=${API_KEY}&per_page=${perPage}&page=${page}&q=${query}&image_type=photo&orientation=horizontal`
-    );
+    const data = await axiosGet('', {
+      params: {
+        per_page: perPage,
+        page,
+        q: query,
+      },
+    });
 
     if (data.total === 0) {
       throw new Error(`Not found for request: "${query}"`);
     }
 
-    const images = data.hits.map(
-      ({ id, tags, webformatURL, largeImageURL }) => ({
-        id,
-        alt: tags,
-        smallImg: webformatURL,
-        fullImg: largeImageURL,
-      })
-    );
-
-    return { totalImages: data.totalHits, images };
+    return data;
   } catch (error) {
     if (error.code) {
       throw new Error(

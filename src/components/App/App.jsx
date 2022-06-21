@@ -7,7 +7,7 @@ import { Wrapper, Inner } from './App.styled';
 import Searchbar from 'components/Searchbar';
 import ImageGallery from 'components/ImageGallery';
 import Button from 'components/Button';
-import Loading from 'components/Loading';
+import Loader from 'components/Loader';
 
 const IMAGES_PER_PAGE = 12;
 
@@ -26,27 +26,36 @@ function App() {
   const [status, setStatus] = useState(STATUS.IDLE);
 
   const toastId = useRef(null);
+  const searchbar = useRef(null);
+  const imgItemRef = useRef(null);
 
   useEffect(() => {
     if (filter === '') {
       return;
     }
 
-    setStatus(STATUS.PENDING);
+    (async () => {
+      setStatus(STATUS.PENDING);
 
-    serverAPI
-      .getData(filter, page, IMAGES_PER_PAGE)
-      .then(data => {
+      try {
+        const data = await serverAPI.getData(filter, page, IMAGES_PER_PAGE);
+
         toast.dismiss(toastId.current);
         setImages(images => [...images, ...data.images]);
         setTotalImages(data.totalImages);
         setStatus(STATUS.RESOLVED);
-      })
-      .catch(error => {
+      } catch (error) {
         setStatus(STATUS.REJECTED);
         toastId.current = toast.error(error.message);
-      });
+      }
+    })();
   }, [filter, page]);
+
+  useEffect(() => {
+    if (imgItemRef.current) {
+      scrollPage();
+    }
+  }, [page]);
 
   function handleFormSubmit(newFilter) {
     if (newFilter === filter) {
@@ -64,26 +73,47 @@ function App() {
   }
 
   function haveMoreImages() {
-    const isMoreImages = totalImages - page * IMAGES_PER_PAGE > 0;
+    return totalImages - page * IMAGES_PER_PAGE > 0;
+  }
 
-    return isMoreImages;
+  function scrollPage() {
+    console.log('Scroll');
+    const imgItemOffsetTop = imgItemRef.current.offsetTop;
+    const searchbarHeight = searchbar.current.offsetHeight;
+    const windowScroll = document.documentElement.scrollTop;
+    const scrollValue = imgItemOffsetTop - windowScroll - searchbarHeight;
+
+    window.scrollBy({
+      top: scrollValue,
+      behavior: 'smooth',
+    });
   }
 
   const isMoreImages = haveMoreImages() && status === STATUS.RESOLVED;
+  const imgItemRefIndex = (page - 1) * IMAGES_PER_PAGE;
 
   return (
     <Wrapper>
       <Searchbar
         onSubmit={handleFormSubmit}
         isLoading={status === STATUS.PENDING}
+        ref={searchbar}
       />
 
       <Inner>
-        <ImageGallery images={images} />
+        {images.length > 0 && (
+          <ImageGallery
+            images={images}
+            ref={imgItemRef}
+            refIndex={imgItemRefIndex}
+          />
+        )}
 
         {isMoreImages && <Button onClick={handleLoadMore} />}
 
-        {status === STATUS.PENDING && <Loading />}
+        {status === STATUS.PENDING && (
+          <Loader isFirstRender={images.length === 0} />
+        )}
       </Inner>
 
       <Toaster {...TOAST_OPTION} />
