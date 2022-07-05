@@ -1,9 +1,9 @@
-import { useState, forwardRef } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Modal from 'components/Modal';
 import { Item, Image, ImgModal } from './ImageGalleryItem.styled';
 
-const ImageGalleryItem = forwardRef(({ alt, smallImg, fullImg }, ref) => {
+const ImageGalleryItem = ({ alt, smallImg, fullImg }) => {
   const [showModal, setShowModal] = useState(false);
 
   function handleToggleModal() {
@@ -12,7 +12,7 @@ const ImageGalleryItem = forwardRef(({ alt, smallImg, fullImg }, ref) => {
 
   return (
     <>
-      <Item onClick={handleToggleModal} ref={ref}>
+      <Item onClick={handleToggleModal}>
         <Image src={smallImg} alt={alt} />
       </Item>
 
@@ -23,7 +23,7 @@ const ImageGalleryItem = forwardRef(({ alt, smallImg, fullImg }, ref) => {
       )}
     </>
   );
-});
+};
 
 ImageGalleryItem.propTypes = {
   alt: PropTypes.string.isRequired,

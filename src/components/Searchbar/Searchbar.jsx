@@ -1,11 +1,11 @@
-import { useState, useRef, forwardRef } from 'react';
+import { useState, useRef } from 'react';
 import { nanoid } from 'nanoid';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import { IoIosSearch } from 'react-icons/io';
 import { Container, Form, Button, Label, Input } from './Searchbar.styled';
 
-const Searchbar = forwardRef(({ onSubmit, isLoading }, ref) => {
+const Searchbar = ({ onSubmit, isLoading }) => {
   const [filter, setFilter] = useState('');
   const inputId = nanoid(5);
   const toastId = useRef(null);
@@ -20,10 +20,10 @@ const Searchbar = forwardRef(({ onSubmit, isLoading }, ref) => {
 
     if (!isLoading) {
       const normalizedFilter = filter.trim().toLowerCase();
-      setFilter('');
 
       if (normalizedFilter === '') {
         toastId.current = toast.error('Request cannot be empty');
+        setFilter('');
         return;
       }
 
@@ -32,19 +32,19 @@ const Searchbar = forwardRef(({ onSubmit, isLoading }, ref) => {
   }
 
   return (
-    <Container ref={ref}>
+    <Container>
       <Form onSubmit={handleSubmit}>
         <Button type="submit" aria-label="Search" disabled={isLoading}>
           <IoIosSearch />
         </Button>
-        <Label htmlFor={inputId}>Search images and photos</Label>
+        <Label htmlFor={inputId + "-search"}>Search</Label>
         <Input
           type="text"
           autoComplete="off"
           autoFocus
           required
           placeholder="Search images and photos"
-          id={inputId}
+          id={inputId + "-search"}
           value={filter}
           onChange={handleChange}
           onClick={() => toast.dismiss(toastId.current)}
@@ -52,7 +52,7 @@ const Searchbar = forwardRef(({ onSubmit, isLoading }, ref) => {
       </Form>
     </Container>
   );
-});
+};
 
 Searchbar.propTypes = {
   onSubmit: PropTypes.func.isRequired,

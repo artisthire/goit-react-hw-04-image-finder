@@ -26,8 +26,7 @@ function App() {
   const [status, setStatus] = useState(STATUS.IDLE);
 
   const toastId = useRef(null);
-  const searchbar = useRef(null);
-  const imgItemRef = useRef(null);
+  const scrollByRef = useRef(null);
 
   useEffect(() => {
     if (filter === '') {
@@ -52,8 +51,8 @@ function App() {
   }, [filter, page]);
 
   useEffect(() => {
-    if (imgItemRef.current) {
-      scrollPage();
+    if (page > 1) {
+      setTimeout(scrollPage, 0);
     }
   }, [page]);
 
@@ -77,35 +76,26 @@ function App() {
   }
 
   function scrollPage() {
-    console.log('Scroll');
-    const imgItemOffsetTop = imgItemRef.current.offsetTop;
-    const searchbarHeight = searchbar.current.offsetHeight;
-    const windowScroll = document.documentElement.scrollTop;
-    const scrollValue = imgItemOffsetTop - windowScroll - searchbarHeight;
-
     window.scrollBy({
-      top: scrollValue,
+      top: document.documentElement.clientHeight - scrollByRef.current.offsetTop,
       behavior: 'smooth',
     });
   }
 
   const isMoreImages = haveMoreImages() && status === STATUS.RESOLVED;
-  const imgItemRefIndex = (page - 1) * IMAGES_PER_PAGE;
 
   return (
     <Wrapper>
       <Searchbar
         onSubmit={handleFormSubmit}
         isLoading={status === STATUS.PENDING}
-        ref={searchbar}
       />
 
       <Inner>
         {images.length > 0 && (
           <ImageGallery
             images={images}
-            ref={imgItemRef}
-            refIndex={imgItemRefIndex}
+            ref={{ scrollByRef }}
           />
         )}
 

@@ -4,34 +4,25 @@ import { GalleryList } from './ImageGallery.styled';
 
 import ImageGalleryItem from 'components/ImageGallery/ImageGalleryItem';
 
-const ImageGallery = forwardRef(({ images, refIndex }, ref) => {
+const ImageGallery = forwardRef(({ images }, ref) => {
   return (
-    <GalleryList>
-      {images.map((image, index) => {
-        const { id, alt, smallImg, fullImg } = image;
+    <>
+      <div ref={ref.scrollByRef}></div>
+      <GalleryList>
+        {images.map((image, index) => {
+          const { id, alt, smallImg, fullImg } = image;
 
-        if (index === refIndex) {
           return (
             <ImageGalleryItem
               key={id}
               smallImg={smallImg}
               fullImg={fullImg}
               alt={alt}
-              ref={ref}
             />
           );
-        }
-
-        return (
-          <ImageGalleryItem
-            key={id}
-            smallImg={smallImg}
-            fullImg={fullImg}
-            alt={alt}
-          />
-        );
-      })}
-    </GalleryList>
+        })}
+      </GalleryList>
+    </>
   );
 });
 
